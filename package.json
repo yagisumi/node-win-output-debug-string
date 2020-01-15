@@ -1,21 +1,27 @@
 {
-  "name": "test0",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
+  "name": "win-output-debug-string",
+  "version": "0.1.0",
+  "description": "OutputDebugString() and monitor",
+  "engines": {
+    "node": ">= 8.16.0"
   },
+  "os": [
+    "win32"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-gyp rebuild"
+    "test": "node ./test/test.js",
+    "install": "node-gyp rebuild",
+    "prepack": "npm test"
   },
   "keywords": [],
-  "author": "Yagi Sumiya <goatship4@yahoo.co.jp> (https://github.com/yagisumi/)",
+  "author": "yagisumi",
   "license": "MIT",
   "gypfile": true,
   "dependencies": {
     "bindings": "^1.5.0",
     "node-addon-api": "^2.0.0"
-  }
+  },
+  "devDependencies": {}
 }
