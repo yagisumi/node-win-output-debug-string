@@ -5,30 +5,23 @@
 #include <thread>
 #include <cstdio>
 
-#if DEBUG
-void
-debug(const char *fmt, ...)
-{
-    char buf[128] = {0};
-    va_list list;
-    va_start(list, fmt);
-    _vsnprintf(buf, 127, fmt, list);
-    OutputDebugStringA(buf);
-    va_end(list);
-}
-#else
-#define debug(fmt, ...)
-#endif
-
 using namespace Napi;
-
-static ObjectReference monitor;
 
 static const size_t STR_LEN = 4096 - sizeof(DWORD);
 
 struct OdsBuffer {
-  DWORD processId;
-  char  data[STR_LEN];
+  DWORD pid;
+  char  message[STR_LEN];
+};
+
+class OdsInfo {
+  public:
+    DWORD pid;
+    WCHAR message[STR_LEN];
+    OdsInfo(OdsBuffer *buf) {
+      pid = buf->pid;
+      MultiByteToWideChar(CP_ACP, 0, buf->message, -1, message, STR_LEN);
+    }
 };
 
 enum ErrorCode {
@@ -37,29 +30,28 @@ enum ErrorCode {
   AlreadyStartingError,
   SecurityInitializationError,
   ResourcesInitializationError,
-  AlreadyExistsError,
-
+  EventAlreadyExistsError,
 };
+
+static ObjectReference monitor;
 
 class Monitor : public ObjectWrap<Monitor> {
   public:
     static Object Init(Napi::Env env, Object exports);
     static FunctionReference constructor;
     Monitor(const CallbackInfo &info);
-    virtual ~Monitor();
-  private:
     Napi::Value start(const CallbackInfo &info);
     Napi::Value stop(const CallbackInfo &info);
 
+  private:
     bool running = false;
     bool securityInitialized = false;
-    HANDLE file;
-    OdsBuffer* buf;
-    WCHAR wstr[STR_LEN];
+    HANDLE file = NULL;
+    OdsBuffer* buf = nullptr;
     SECURITY_ATTRIBUTES secAttr;
     SECURITY_DESCRIPTOR secDesc;
-    HANDLE BUFFER_READY;
-    HANDLE DATA_READY;
+    HANDLE BUFFER_READY = NULL;
+    HANDLE DATA_READY = NULL;
     ThreadSafeFunction tsfn;
     std::thread nativeThread;
     bool initializeSecurity();
@@ -72,10 +64,6 @@ class Monitor : public ObjectWrap<Monitor> {
 FunctionReference Monitor::constructor;
 
 Monitor::Monitor(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Monitor>(info) {}
-
-Monitor::~Monitor() {
-  debug("Monitor::~Monitor()");
-}
 
 bool Monitor::initializeSecurity() {
   secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -106,8 +94,8 @@ Value Monitor::error(const CallbackInfo &info, ErrorCode errCode) {
   if (errCode == OK) {
     obj["ok"] = Boolean::New(env, true);
   } else {
-    auto err = Object::New(env);
     obj["ok"] = Boolean::New(env, false);
+    auto err = Object::New(env);
     const char *errName;
     const char *errMsg;
 
@@ -123,8 +111,8 @@ Value Monitor::error(const CallbackInfo &info, ErrorCode errCode) {
     } else if (errCode == ResourcesInitializationError) {
       errName = "ResourcesInitializationError";
       errMsg = "An error occurred during resources initialization.";
-    } else if (errCode == AlreadyExistsError) {
-      errName = "AlreadyExistsError";
+    } else if (errCode == EventAlreadyExistsError) {
+      errName = "EventAlreadyExistsError";
       errMsg = "Event already used.";
     } else {
       errName = "unexpected";
@@ -162,7 +150,6 @@ Value Monitor::start(const CallbackInfo &info) {
     return error(info, err);
   }
 
-  // Napi::Env env = info.Env();
   tsfn = ThreadSafeFunction::New(
     info.Env(),
     func,
@@ -176,11 +163,11 @@ Value Monitor::start(const CallbackInfo &info) {
 
   running = true;
   nativeThread = std::thread([this]() {
-    auto callback = [this]( Napi::Env env, Function jsCallback ) {
-      MultiByteToWideChar(CP_ACP, 0, this->buf->data, -1, wstr, STR_LEN);
+    auto callback = []( Napi::Env env, Function jsCallback, OdsInfo* info) {
       auto obj = Object::New(env);
-      obj["pid"] = Number::New(env, this->buf->processId);
-      obj["message"] = String::New(env, reinterpret_cast<const char16_t*>(this->wstr));
+      obj["pid"] = Number::New(env, info->pid);
+      obj["message"] = String::New(env, reinterpret_cast<const char16_t*>(info->message));
+      delete info;
 
       jsCallback.Call({ obj });
     };
@@ -190,14 +177,18 @@ Value Monitor::start(const CallbackInfo &info) {
 
     while (this->running) {
       r = WaitForSingleObject(this->DATA_READY, INFINITE);
-      if (r != WAIT_OBJECT_0)
+      if (r != WAIT_OBJECT_0) {
         break;
-
-      if (!this->running)
+      }
+      if (!this->running) {
         break;
+      }
 
-      napi_status status = this->tsfn.NonBlockingCall(callback);
-      std::printf("status: %d, after NonBlockingCall\n", status);
+      OdsInfo* info = new OdsInfo(this->buf);
+      napi_status status = this->tsfn.NonBlockingCall(info, callback);
+      if (status != napi_ok) {
+        delete info;
+      }
       SetEvent(BUFFER_READY);
     }
     tsfn.Release();
@@ -224,7 +215,7 @@ ErrorCode Monitor::initializeResources() {
     return ResourcesInitializationError;
   }
   if (GetLastError() == ERROR_ALREADY_EXISTS) {
-    return AlreadyExistsError;
+    return EventAlreadyExistsError;
   }
 
   DATA_READY = CreateEvent(&secAttr, FALSE, FALSE, TEXT("DBWIN_DATA_READY"));
@@ -232,7 +223,7 @@ ErrorCode Monitor::initializeResources() {
     return ResourcesInitializationError;
   }
   if (GetLastError() == ERROR_ALREADY_EXISTS) {
-    return AlreadyExistsError;
+    return EventAlreadyExistsError;
   }
 
   return OK;
@@ -271,7 +262,6 @@ Value Monitor::stop(const CallbackInfo &info) {
 
 
 Object Monitor::Init(Napi::Env env, Object exports) {
-  debug("Monitor::Init");
   Function func = DefineClass(env, "Monitor", {
     InstanceMethod("start", &Monitor::start),
     InstanceMethod("stop", &Monitor::stop),
