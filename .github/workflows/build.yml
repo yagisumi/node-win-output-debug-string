@@ -1,0 +1,29 @@
+name: build
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Node.js ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [8, 10, 12, 13]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: node environment
+        run: |
+          node -v
+          npm -v
+      - run: npm install
+      - run: npm test
+      - name: Coveralls
+        if: matrix.node == 12
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
