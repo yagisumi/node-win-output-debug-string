@@ -1,5 +1,5 @@
 {
-  "name": "win-output-debug-string",
+  "name": "@yagisumi/win-output-debug-string",
   "version": "0.1.0",
   "description": "OutputDebugString() and monitor",
   "engines": {

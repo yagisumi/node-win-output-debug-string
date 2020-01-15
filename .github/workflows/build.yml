@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Node.js ${{ matrix.node }}
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         node: [8, 10, 12, 13]
@@ -22,8 +22,3 @@ jobs:
           npm -v
       - run: npm install
       - run: npm test
-      - name: Coveralls
-        if: matrix.node == 12
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.github_token }}
