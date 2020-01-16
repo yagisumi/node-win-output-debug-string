@@ -3,7 +3,7 @@
 Windows `OutputDebugString()` and monitor.
 
 [![NPM version][npm-image]][npm-url] [![install size][packagephobia-image]][packagephobia-url] [![DefinitelyTyped][dts-image]][dts-url]  
-[![Build Status][githubactions-image]][githubactions-url]
+![Requirements][node-ver-image] [![Build Status][githubactions-image]][githubactions-url]
 
 ## Installation
 
@@ -63,6 +63,7 @@ Returns true if stop operation is performed, otherwise returns false.
 [githubactions-url]: https://github.com/yagisumi/node-win-output-debug-string/actions
 [npm-image]: https://img.shields.io/npm/v/@yagisumi/win-output-debug-string.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/@yagisumi/win-output-debug-string
+[node-ver-image]: https://img.shields.io/node/v/@yagisumi/win-output-debug-string?style=flat-square
 [packagephobia-image]: https://flat.badgen.net/packagephobia/install/@yagisumi/win-output-debug-string
 [packagephobia-url]: https://packagephobia.now.sh/result?p=@yagisumi/win-output-debug-string
 [dts-image]: https://img.shields.io/badge/DefinitelyTyped-.d.ts-blue.svg?style=flat-square
