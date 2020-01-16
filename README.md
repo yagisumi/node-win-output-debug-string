@@ -1,6 +1,6 @@
 # @yagisumi/win-output-debug-string
 
-Windows' `OutputDebugString()` and monitor.
+Windows `OutputDebugString()` and monitor.
 
 [![NPM version][npm-image]][npm-url] [![install size][packagephobia-image]][packagephobia-url] [![DefinitelyTyped][dts-image]][dts-url]  
 [![Build Status][githubactions-image]][githubactions-url]
