@@ -39,7 +39,7 @@ setTimeout(() => {
 
 ### `OutputDebugString(message: string): void`
 
-Executes `OutputDebugString()`.
+Calls `OutputDebugString()`.
 
 ### `monitor.start(cb: (info: { pid: number, message: string }) => void): OK | ERR`
 
