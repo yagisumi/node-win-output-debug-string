@@ -34,6 +34,16 @@ async function test() {
   assert.strictEqual(r2.error.name, 'AlreadyStartingError')
 
   assert.strictEqual(monitor.stop(), true)
+
+  const r3 = monitor.start()
+  assert.strictEqual(r3.ok, false)
+  assert.strictEqual(typeof r3.error, 'object')
+  assert.strictEqual(r3.error.name, 'ArgumentError')
+
+  const r4 = monitor.start('test')
+  assert.strictEqual(r4.ok, false)
+  assert.strictEqual(typeof r4.error, 'object')
+  assert.strictEqual(r4.error.name, 'ArgumentError')
 }
 
 async function main() {
