@@ -17,6 +17,8 @@
   },
   "keywords": [],
   "author": "yagisumi",
+  "repository": "github:yagisumi/node-win-output-debug-string",
+  "homepage": "http://github.com/yagisumi/node-win-output-debug-string#readme",
   "license": "MIT",
   "gypfile": true,
   "dependencies": {
