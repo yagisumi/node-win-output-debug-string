@@ -5,9 +5,6 @@
   "engines": {
     "node": ">= 8.16.0"
   },
-  "os": [
-    "win32"
-  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
