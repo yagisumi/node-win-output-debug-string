@@ -7,6 +7,8 @@
 
 using namespace Napi;
 
+#ifdef _WIN32
+
 static const size_t STR_LEN = 4096 - sizeof(DWORD);
 
 struct OdsBuffer {
@@ -253,6 +255,20 @@ Value outputDebugString(const CallbackInfo& info) {
 
   return info.Env().Undefined();
 }
+
+#else
+  Value start(const CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+
+  Value stop(const CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+
+  Value outputDebugString(const CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+#endif
 
 Object Init(Env env, Object exports) {
   exports["OutputDebugString"] = Function::New(env, outputDebugString);

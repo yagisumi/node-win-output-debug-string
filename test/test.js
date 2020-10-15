@@ -9,7 +9,7 @@ function sleep(msec) {
   })
 }
 
-async function test() {
+async function test_win() {
   assert.strictEqual(monitor.stop(), false)
 
   const outputs = []
@@ -46,9 +46,27 @@ async function test() {
   assert.strictEqual(r4.error.name, 'ArgumentError')
 }
 
+async function test_not_win() {
+  assert.strictEqual(OutputDebugString(), undefined)
+  assert.strictEqual(monitor.start(), undefined)
+  assert.strictEqual(
+    monitor.start(() => {}),
+    undefined
+  )
+  assert.strictEqual(monitor.stop(), undefined)
+}
+
 async function main() {
-  const err = await test().catch((err) => err)
+  const err = await (async () => {
+    if (process.platform === 'win32') {
+      return await test_win().catch((err) => err)
+    } else {
+      return await test_not_win().catch((err) => err)
+    }
+  })()
+
   monitor.stop()
+
   if (err) {
     console.error(err)
     process.exit(1)
