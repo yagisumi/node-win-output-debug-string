@@ -8,8 +8,6 @@ using namespace Napi;
 #include <thread>
 #include <cstdio>
 
-
-
 static const size_t STR_LEN = 4096 - sizeof(DWORD);
 
 struct OdsBuffer {
