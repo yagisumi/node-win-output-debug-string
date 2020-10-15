@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        node: [8, 10, 12, 13]
+        node: [8, 10, 12, 14]
     steps:
       - uses: actions/checkout@v2
       - name: Set Node.js
