@@ -17,8 +17,8 @@ async function test() {
     outputs.push(message)
   })
 
-  assert.strictEqual(r1.ok, true)
   assert.strictEqual(r1.error, undefined)
+  assert.strictEqual(r1.ok, true)
 
   OutputDebugString('test1')
   OutputDebugString('test2')
