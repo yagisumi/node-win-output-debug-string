@@ -1,6 +1,6 @@
 {
   "name": "@yagisumi/win-output-debug-string",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "OutputDebugString() and monitor",
   "engines": {
     "node": ">= 8.16.0"
