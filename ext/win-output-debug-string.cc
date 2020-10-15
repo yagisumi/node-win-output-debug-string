@@ -1,13 +1,14 @@
 #define NAPI_VERSION 4
 #include <napi.h>
+using namespace Napi;
+
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <thread>
 #include <cstdio>
 
-using namespace Napi;
 
-#ifdef _WIN32
 
 static const size_t STR_LEN = 4096 - sizeof(DWORD);
 
