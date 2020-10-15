@@ -8,6 +8,7 @@ jobs:
     name: Node.js ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         node: [8, 10, 12, 14]
